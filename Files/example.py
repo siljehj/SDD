@@ -14,7 +14,7 @@ class ExampleProgram:
                    id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
                    name VARCHAR(30))
                 """
-        # This adds table_name to the %s variable and executes the query
+        # This adds table_napython --versionme to the %s variable and executes the query
         self.cursor.execute(query % table_name)
         self.db_connection.commit()
 
@@ -24,7 +24,8 @@ class ExampleProgram:
             # Take note that the name is wrapped in '' --> '%s' because it is a string,
             # while an int would be %s etc
             query = "INSERT INTO %s (name) VALUES ('%s')"
-            self.cursor.execute(query % (table_name, name))
+            self.cursor.execute(query
+                                % (table_name, name))
         self.db_connection.commit()
 
     def fetch_data(self, table_name):
