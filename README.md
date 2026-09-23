@@ -44,7 +44,7 @@ Exit MySQL:
 
 If `database/fake_taxi.sql` already contains the database structure/data, import it:
 
-    docker exec -i fake-taxi-db mysql -u root -p6769 fake_taxi < database\fake_taxi.sql
+    docker exec -i fake-taxi-db mysql -u root -p6769 fake_taxi < database/fake_taxi.sql
 
 The database is now set up.
 
@@ -58,7 +58,7 @@ When someone else has made changes and pushed them to Git:
 
 ### 2. Import the updated database
 
-    docker exec -i fake-taxi-db mysql -u root -p6769 fake_taxi < database\fake_taxi.sql
+    docker exec -i fake-taxi-db mysql -u root -p6769 fake_taxi < database/fake_taxi.sql
 
 ### 3. Open the database
 
@@ -115,7 +115,7 @@ When finished, exit MySQL:
 
 From the VS Code terminal:
 
-    docker exec fake-taxi-db mysqldump -u root -p6769 fake_taxi > database\fake_taxi.sql
+    docker exec fake-taxi-db mysqldump -u root -p6769 fake_taxi > database/fake_taxi.sql
 
 Make sure `fake_taxi.sql` is saved as UTF-8.
 
