@@ -1,1 +1,0 @@
-print("elise er kul")
