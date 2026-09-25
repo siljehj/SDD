@@ -1,5 +1,3 @@
-# Fake taxi
-
 # Database Setup
 
 The database runs locally using MySQL in Docker. Each group member has their own local database, and `database/fake_taxi.sql` is used to share database changes through Git.
