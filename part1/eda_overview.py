@@ -1,11 +1,14 @@
 import csv
 from collections import Counter
 from datetime import datetime
+import json
 
 from tabulate import tabulate
+from pathlib import Path
 
 
-FILE = "files/porto.csv"
+SCRIPT_DIR = Path(__file__).resolve().parent.parent
+FILE = SCRIPT_DIR / "files" / "porto.csv"
 
 
 # ============================================================
@@ -95,15 +98,10 @@ duplicate_trip_ids = sum(
     if count > 1
 )
 
-duplicate_trip_rows = sum(
-    count - 1
-    for count in trip_id_counts.values()
-    if count > 1
-)
-
 print("Unique TRIP_IDs:", unique_trip_ids)
 print("Unique TAXI_IDs:", unique_taxi_ids)
 print("Duplicated TRIP_IDs:", duplicate_trip_ids)
+
 
 # ============================================================
 # CALL_TYPE
@@ -130,6 +128,158 @@ print(
         tablefmt="pretty"
     )
 )
+
+
+# ============================================================
+# CALL_TYPE consistency
+# ============================================================
+
+print("\nCALL_TYPE consistency")
+print("--------------------")
+
+a_without_origin_call = sum(
+    1
+    for row in data
+    if row["CALL_TYPE"] == "A"
+    and row["ORIGIN_CALL"] == ""
+)
+
+b_without_origin_stand = sum(
+    1
+    for row in data
+    if row["CALL_TYPE"] == "B"
+    and row["ORIGIN_STAND"] == ""
+)
+
+c_with_origin_call = sum(
+    1
+    for row in data
+    if row["CALL_TYPE"] == "C"
+    and row["ORIGIN_CALL"] != ""
+)
+
+c_with_origin_stand = sum(
+    1
+    for row in data
+    if row["CALL_TYPE"] == "C"
+    and row["ORIGIN_STAND"] != ""
+)
+
+a_with_origin_stand = sum(
+    1
+    for row in data
+    if row["CALL_TYPE"] == "A"
+    and row["ORIGIN_STAND"] != ""
+)
+
+b_with_origin_call = sum(
+    1
+    for row in data
+    if row["CALL_TYPE"] == "B"
+    and row["ORIGIN_CALL"] != ""
+)
+
+call_type_consistency_table = [
+    ["A without ORIGIN_CALL", a_without_origin_call],
+    ["B without ORIGIN_STAND", b_without_origin_stand],
+    ["C with ORIGIN_CALL", c_with_origin_call],
+    ["C with ORIGIN_STAND", c_with_origin_stand],
+    ["A with ORIGIN_STAND", a_with_origin_stand],
+    ["B with ORIGIN_CALL", b_with_origin_call],
+]
+
+print(
+    tabulate(
+        call_type_consistency_table,
+        headers=["Check", "Count"],
+        tablefmt="pretty"
+    )
+)
+
+
+# ============================================================
+# B trips without ORIGIN_STAND
+# ============================================================
+
+print("\nB trips without ORIGIN_STAND")
+print("---------------------------")
+
+b_missing_stand = [
+    row
+    for row in data
+    if row["CALL_TYPE"] == "B"
+    and row["ORIGIN_STAND"] == ""
+]
+
+b_missing_taxis = {
+    row["TAXI_ID"]
+    for row in b_missing_stand
+}
+
+b_missing_timestamps = [
+    int(row["TIMESTAMP"])
+    for row in b_missing_stand
+]
+
+print("Number of trips:", len(b_missing_stand))
+print("Distinct taxis:", len(b_missing_taxis))
+
+if b_missing_timestamps:
+    print(
+        "Time range:",
+        datetime.fromtimestamp(min(b_missing_timestamps)),
+        "-",
+        datetime.fromtimestamp(max(b_missing_timestamps))
+    )
+
+b_short_trajectories = 0
+
+for row in b_missing_stand:
+
+    try:
+        trajectory = json.loads(row["POLYLINE"])
+        number_of_points = len(trajectory)
+
+    except (json.JSONDecodeError, TypeError):
+        number_of_points = 0
+
+    if number_of_points < 3:
+        b_short_trajectories += 1
+
+print(
+    "Trips with fewer than 3 GPS points:",
+    b_short_trajectories
+)
+
+
+# ============================================================
+# Examples of B trips without ORIGIN_STAND
+# ============================================================
+
+print()
+print("Examples of B trips without ORIGIN_STAND")
+print("-----------------------------------------")
+
+example_count = 10
+
+for row in b_missing_stand[:example_count]:
+
+    try:
+        trajectory = json.loads(row["POLYLINE"])
+        number_of_points = len(trajectory)
+
+    except (json.JSONDecodeError, TypeError):
+        number_of_points = 0
+
+    print(
+        f"TRIP_ID: {row['TRIP_ID']} | "
+        f"TAXI_ID: {row['TAXI_ID']} | "
+        f"TIMESTAMP: {row['TIMESTAMP']} | "
+        f"ORIGIN_CALL: {row['ORIGIN_CALL']} | "
+        f"ORIGIN_STAND: {row['ORIGIN_STAND']} | "
+        f"MISSING_DATA: {row['MISSING_DATA']} | "
+        f"POLYLINE points: {number_of_points}"
+    )
 
 
 # ============================================================

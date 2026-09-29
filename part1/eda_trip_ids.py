@@ -237,16 +237,36 @@ print(
 )
 
 
-remaining_ids = set(duplicate_ids)
+# ============================================================
+# 1. Remove duplicated IDs containing MISSING_DATA
+# ============================================================
+
+duplicate_ids_with_missing_data = set()
+
+for trip_id in duplicate_ids:
+
+    rows = duplicate_rows[trip_id]
+
+    if any(
+        row["MISSING_DATA"] == "True"
+        for row in rows
+    ):
+        duplicate_ids_with_missing_data.add(trip_id)
+
+
+remaining_ids = (
+    set(duplicate_ids)
+    - duplicate_ids_with_missing_data
+)
 
 
 # ============================================================
-# 1. Exactly identical rows
+# 2. Exactly identical rows
 # ============================================================
 
 exact_duplicates = []
 
-for trip_id in duplicate_ids:
+for trip_id in remaining_ids:
 
     rows = duplicate_rows[trip_id]
 
@@ -266,7 +286,7 @@ remaining_ids -= set(exact_duplicates)
 
 
 # ============================================================
-# 2. Parse trajectories
+# 3. Parse trajectories
 # ============================================================
 
 parsed = {}
@@ -440,14 +460,25 @@ print(
 )
 
 print(
-    f"Exactly identical rows: "
-    f"{len(exact_duplicates)}"
+    f"Containing MISSING_DATA: "
+    f"{len(duplicate_ids_with_missing_data)}"
 )
 
 remaining = (
     len(duplicate_ids)
-    - len(exact_duplicates)
+    - len(duplicate_ids_with_missing_data)
 )
+
+print(
+    f"Remaining: {remaining}"
+)
+
+print(
+    f"Exactly identical rows: "
+    f"{len(exact_duplicates)}"
+)
+
+remaining -= len(exact_duplicates)
 
 print(
     f"Remaining: {remaining}"
@@ -613,13 +644,18 @@ for trip_id in unexplained:
 
     # Determine which is the short and long trajectory.
     if len(traj1) <= len(traj2):
+
         short_entry = first
         long_entry = second
+
         short_label = "Trip 1"
         long_label = "Trip 2"
+
     else:
+
         short_entry = second
         long_entry = first
+
         short_label = "Trip 2"
         long_label = "Trip 1"
 
@@ -678,7 +714,8 @@ print("Final check")
 print("-----------")
 
 classified = (
-    len(exact_duplicates)
+    len(duplicate_ids_with_missing_data)
+    + len(exact_duplicates)
     + len(identical_trajectories)
     + len(subset_trajectories)
     + len(connected_trips)
