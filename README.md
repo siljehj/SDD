@@ -1,6 +1,6 @@
 # Database Setup
 
-The database runs locally using MySQL in Docker. Each group member has their own local database, and `database/fake_taxi.sql` is used to share database changes through Git.
+The database runs locally using MySQL in Docker. Each group member has their own local database, and `files/fake_taxi.sql` is used to share database changes through Git.
 
 ## Initial Setup
 
@@ -40,9 +40,9 @@ Exit MySQL:
 
 ### 3. Import the Existing Database
 
-If `database/fake_taxi.sql` already contains the database structure/data, import it:
+If `files/fake_taxi.sql` already contains the database structure/data, import it:
 
-    docker exec -i fake-taxi-db mysql -u root -p6769 fake_taxi < database/fake_taxi.sql
+    docker exec -i fake-taxi-db mysql -u root -p6769 fake_taxi | files/fake_taxi.sql
 
 The database is now set up.
 
@@ -56,7 +56,7 @@ When someone else has made changes and pushed them to Git:
 
 ### 2. Import the updated database
 
-    docker exec -i fake-taxi-db mysql -u root -p6769 fake_taxi < database/fake_taxi.sql
+    docker exec -i fake-taxi-db mysql -u root -p6769 fake_taxi | files/fake_taxi.sql
 
 ### 3. Open the database
 
@@ -113,13 +113,13 @@ When finished, exit MySQL:
 
 From the VS Code terminal:
 
-    docker exec fake-taxi-db mysqldump -u root -p6769 fake_taxi > database/fake_taxi.sql
+    docker exec fake-taxi-db mysqldump -u root -p6769 fake_taxi | files/fake_taxi.sql
 
 Make sure `fake_taxi.sql` is saved as UTF-8.
 
 ### 4. Push the changes to Git
 
-    git add database/fake_taxi.sql
+    git add files/fake_taxi.sql
     git commit -m "Update database"
     git push
 
