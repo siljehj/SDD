@@ -1,0 +1,4 @@
+call_type,number_of_trips,avg_duration_minutes,avg_distance_km,share_00_06_pct,share_06_12_pct,share_12_18_pct,share_18_24_pct
+A,362686,12.58,5.42,12.04,31.81,32.59,23.55
+B,808706,11.21,5.11,13.02,27.76,34.56,24.66
+C,502393,13.53,6.6,31.64,24.41,24.09,19.86
